@@ -32,11 +32,6 @@ public class NetworkTask extends AsyncTask<Integer, String, Object> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setProgressStyle(progressDialog.STYLE_SPINNER);
-        progressDialog.setTitle("Data Fetch");
-        progressDialog.setMessage("Get...");
-        progressDialog.show();
     }
 
     @Override
@@ -92,7 +87,6 @@ public class NetworkTask extends AsyncTask<Integer, String, Object> {
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
-        progressDialog.dismiss();
     }
 
     @Override
@@ -109,7 +103,8 @@ public class NetworkTask extends AsyncTask<Integer, String, Object> {
                 JSONObject jsonObject1 = (JSONObject) jsonArray.get(i);
                 String sendId = jsonObject1.getString("sendId");
                 String sendContents = jsonObject1.getString("sendContents");
-                ChattingBean chattingBean = new ChattingBean(sendId, sendContents);
+                int chattingNo =  jsonObject1.getInt("chattingNo");
+                ChattingBean chattingBean = new ChattingBean(sendId, sendContents, chattingNo);
                 chattingContents.add(chattingBean);
             }
         } catch (Exception e){
