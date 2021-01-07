@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -21,9 +23,12 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -71,6 +76,14 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private Marker currentMarker = null;
     private Marker setMarker = null;
+
+    // 말풍선 레이아웃
+    private ViewGroup infoWindow;
+    private ImageView infoImage;
+    private TextView infoTitle;
+    private TextView infoStore;
+    private ImageView infoMove;
+
 
     private static final String TAG = "googlemap_example";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -144,6 +157,14 @@ public class MainActivity extends AppCompatActivity
 
         // 주변 위치 검색
         previous_marker = new ArrayList<Marker>();
+
+
+        // 말풍선 레이아웃 선언
+        this.infoWindow = (ViewGroup)getLayoutInflater().inflate(R.layout.infowindow_layout, null);
+        this.infoImage = (ImageView) infoWindow.findViewById(R.id.image_info);
+        this.infoTitle = (TextView)infoWindow.findViewById(R.id.title_info);
+        this.infoStore = (TextView)infoWindow.findViewById(R.id.store_info);
+        this.infoMove = (ImageView)infoWindow.findViewById(R.id.imageMove_info);
 
         Button b4 = findViewById(R.id.button4);
         b4.setOnClickListener(mClickListener);
@@ -400,13 +421,14 @@ public class MainActivity extends AppCompatActivity
                     markerOptions.position(setLatLng);
                     markerOptions.title("위치" + (i + 1));
                     //markerOptions.snippet(list.get(0).get);
-                    markerOptions.draggable(true);
+                    markerOptions.draggable(false);
 
 
                     setMarker = mMap.addMarker(markerOptions);
                 }
             }
         }
+
     }
 
 
@@ -419,6 +441,24 @@ public class MainActivity extends AppCompatActivity
 
         // 말풍선 클릭 시 이벤트
         mMap.setOnInfoWindowClickListener(this);
+
+        ////////////////////////////////////////////
+        // 말풍선 레이아웃
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                infoTitle.setText(marker.getTitle());
+//                infoStore.setText(marker.getSnippet());
+
+                return infoWindow;
+            }
+        });
+
         Geocoder geocoder = new Geocoder(this);
 
         //런타임 퍼미션 요청 대화상자나 GPS 활성 요청 대화상자 보이기전에
@@ -470,7 +510,7 @@ public class MainActivity extends AppCompatActivity
                     markerOptions.position(setLatLng);
                     markerOptions.title("위치" + (i + 1));
                     //markerOptions.snippet(list.get(0).get);
-                    markerOptions.draggable(true);
+                    markerOptions.draggable(false);
 
 
                     setMarker = mMap.addMarker(markerOptions);
@@ -773,10 +813,19 @@ public class MainActivity extends AppCompatActivity
         markerOptions.position(currentLatLng);
         markerOptions.title("내 위치");
         markerOptions.snippet(markerSnippet);
-        markerOptions.draggable(true);
+        // icon 설정 방법
+//        BitmapDrawable bitmapdraw=(BitmapDrawable)getResources().getDrawable(R.drawable.gps);
+//        Bitmap b=bitmapdraw.getBitmap();
+//        Bitmap smallMarker = Bitmap.createScaledBitmap(b, 200, 200, false);
+//        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+
+        markerOptions.draggable(false);
 
 
         currentMarker = mMap.addMarker(markerOptions);
+
+        // 말풍선 항상 출력
+//        currentMarker.showInfoWindow();
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
         mMap.moveCamera(cameraUpdate);
@@ -1002,7 +1051,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    // 마커 위 말풍선 클릭 시 이벤
+    // 마커 위 말풍선 클릭 시 이벤트
     @Override
     public void onInfoWindowClick(Marker marker) {
 
@@ -1026,6 +1075,8 @@ public class MainActivity extends AppCompatActivity
         search.setText(markerSnippet.substring(4));
         Toast.makeText(this, "주소는 " + markerSnippet.substring(4),
                 Toast.LENGTH_SHORT).show();
+//        Intent intent = new Intent(MainActivity.this, a.class);
+//        startActivity(intent);
 
 
     }
