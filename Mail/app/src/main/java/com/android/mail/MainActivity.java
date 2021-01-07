@@ -16,8 +16,12 @@ import javax.mail.SendFailedException;
 
 public class MainActivity extends AppCompatActivity {
 
-    String user = "pakk7026@gmail.com"; // 보내는 계정의 id
-    String password = "kyeongmi7"; // 보내는 계정의 pw
+    /////////////////////////////////
+    // 발신자 메일 계정 작성 (gmail)
+    /////////////////////////////////
+
+    String user = ""; // 보내는 계정의 id
+    String password = ""; // 보내는 계정의 pw
 
     Button mailBtn;
     EditText email;

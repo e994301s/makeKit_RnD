@@ -9,14 +9,17 @@ import javax.mail.SendFailedException;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SendMail extends AppCompatActivity {
-//    String user = "pakk7026@gmail.com"; // 보내는 계정의 id
-//    String password = "kyeongmi7"; // 보내는 계정의 pw
+//    String user = ""; // 보내는 계정의 id
+//    String password = ""; // 보내는 계정의 pw
 
     public String sendSecurityCode(Context context, String sendTo, String user, String password) {
         String code = "";
         try {
             GMailSender gMailSender = new GMailSender(user, password);
             code = gMailSender.getEmailCode();
+            //////////////////////////////////
+            // 메일 내용 작성!! (body)
+            //////////////////////////////////
             String body = "인증번호는 "  + code +"입니다." ;
             gMailSender.sendMail("이메일 인증코드 발송 메일입니다.", body, sendTo);
             Toast.makeText(context, "이메일을 성공적으로 보냈습니다.", Toast.LENGTH_SHORT).show();
