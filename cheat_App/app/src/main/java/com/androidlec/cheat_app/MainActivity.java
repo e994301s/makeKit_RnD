@@ -32,14 +32,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         editText = findViewById(R.id.chat_edit);
         insertButton = findViewById(R.id.chat_btn);
         listView = findViewById(R.id.chat_lv);
 
         urlAddr = "http://192.168.0.4:8080/chat/";
-
-
 
         handler = new Handler(){
             @Override
@@ -65,8 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     while (isRun){
                         connectGetData();
-                        Thread.sleep(100);
-                        Log.v("chatting", "채팅 사이즈 : "+chattingContents.size());
+                        Thread.sleep(500);
                         if(judgement()==chattingContents.size()){
                             Message msg = handler.obtainMessage();
                             msg.what = 1;
@@ -123,8 +119,6 @@ public class MainActivity extends AppCompatActivity {
             NetworkTask networkTask = new NetworkTask(MainActivity.this, urlAddr+"chatting.jsp");
             Object obj = networkTask.execute().get();
             chattingContents = (ArrayList<ChattingBean>) obj;
-
-
             chattingJudge.addAll(chattingContents);
         }catch (Exception e){
             e.printStackTrace();
@@ -138,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
             int judge = chattingJudge.get(i).getChattingNo();
             if(contents == judge){
                 j++;
-                Log.v("chatting", "판단 : "+j);
             }else {
             }
         }
