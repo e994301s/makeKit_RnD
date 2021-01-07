@@ -20,7 +20,7 @@
         <!--  구글 API 추가      -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDSE8np8XqqfILhQ7CLcFMC339smKhwItY" />
+            android:value="AIzaSyDuhO_FHolRcKsYMZz83Ss0td7-UyWjSDI" />
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
 
         <!-- 끝      -->

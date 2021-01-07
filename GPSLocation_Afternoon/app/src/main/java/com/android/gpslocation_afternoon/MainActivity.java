@@ -829,6 +829,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public void onMapClick(LatLng latLng){
+        MarkerOptions mar
+    }
 
 //    @Override
 //    public boolean onMarkerClick(Marker marker) {
