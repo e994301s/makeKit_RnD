@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};  // 외부 저장소
 
 
-    Location mCurrentLocatiion;
     LatLng currentPosition;
     List<Marker> previous_marker = null;
 
@@ -99,13 +98,14 @@ public class MainActivity extends AppCompatActivity
     EditText search;
     private View mLayout;  // Snackbar 사용하기 위해서는 View가 필요합니다.
     // (참고로 Toast에서는 Context가 필요했습니다.)
-    Double intentLat, intentLng;
     // 현재값 가져오기 위해
     List<Address> addresses;
 
     // 1/5 test
-    ArrayList<Double> lat;
-    ArrayList<Double> lng;
+    double lat;
+    double lng;
+    ArrayList<Address> data;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity
 
         locationRequest = new LocationRequest()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        ////////////////////////////////////////////////////////////
 //                .setInterval(UPDATE_INTERVAL_MS)
 //                .setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
 
@@ -142,78 +141,40 @@ public class MainActivity extends AppCompatActivity
 
 
         //Geocoder geocoder = new Geocoder(this);
-// 주변 위치 검색
+
+        // 주변 위치 검색
         previous_marker = new ArrayList<Marker>();
 
         Button b4 = findViewById(R.id.button4);
         b4.setOnClickListener(mClickListener);
-//
-//
-//        lat = new ArrayList<Double>();
-//        lng = new ArrayList<Double>();
-//        lat.add(37.15);
-//        lat.add(37.14);
-//        lat.add(37.143);
-//        lng.add(128.1);
-//        lng.add(128.01);
-//        lng.add(128.13);
 
     }
 
+    // (검색) 장소 입력 후 버튼 클릭 시 이벤트
     View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
 
             mMap.clear();//지도 클리어
-
-
-            showPlaceInformation(currentPosition);
-
-            ///////////////////////////////////////
-            ////////////////////////////////////////
-            // 주소로 가져오기   ( 위치 받아서 넣기)
-            ////////////////////////////////////////
-            ///////////////////////////////////////
+            sellerLocation();
             String str = search.getText().toString().trim();
 
-           Geocoder geocoder = new Geocoder(getBaseContext());
+            Geocoder geocoder = new Geocoder(getBaseContext());
             List<Address> list = null;
+            data = new ArrayList<Address>();
 
-            try {
-                list = geocoder.getFromLocationName
-                        (str, // 지역 이름
-                                10); // 읽을 개수
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e("test","입출력 오류 - 서버에서 주소변환시 에러발생");
-            }
+                try {
+                    list = geocoder.getFromLocationName
+                            (str, // 지역 이름
+                                    10); // 읽을 개수
 
-//            System.out.println(list.get(0).toString());
-//            // 콤마를 기준으로 split
-//            String []splitStr = list.get(0).toString().split(",");
-//            String address = splitStr[0].substring(splitStr[0].indexOf("\"") + 1,splitStr[0].length() - 2); // 주소
-//            System.out.println(address);
-//
-//            String latitude = splitStr[10].substring(splitStr[10].indexOf("=") + 1); // 위도
-//            String longitude = splitStr[12].substring(splitStr[12].indexOf("=") + 1); // 경도
-//            System.out.println(latitude);
-//            System.out.println(longitude);
-//
-//            // 좌표(위도, 경도) 생성
-//            LatLng point = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-//
-//            // 마커 생성
-//            MarkerOptions mOptions2 = new MarkerOptions();
-//            mOptions2.title("search result");
-//            mOptions2.snippet(address);
-//            mOptions2.position(point);
-//            // 마커 추가
-//            mMap.addMarker(mOptions2);
-//            // 해당 좌표로 화면 줌
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point,15));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("test", "입출력 오류 - 서버에서 주소변환시 에러발생");
+                }
 
-            //주석 처리 1/6
+
             if (list != null) {
                 if (list.size() == 0) {
                     Toast.makeText(MainActivity.this, "해당되는 주소 정보는 없습니다", Toast.LENGTH_SHORT).show();
@@ -227,7 +188,7 @@ public class MainActivity extends AppCompatActivity
 
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(setLatLng);
-                    markerOptions.title("설정");
+                    markerOptions.title("위치 보내기");
                     //markerOptions.snippet(list.get(0).get);
                     markerOptions.draggable(true);
 
@@ -236,6 +197,9 @@ public class MainActivity extends AppCompatActivity
 
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(setLatLng);
                     mMap.moveCamera(cameraUpdate);
+
+
+
 
 //                        String sss = String.format("geo:%f,%f", lat, lon);
 //
@@ -249,18 +213,273 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+           //showPlaceInformation(currentPosition);
+//            addressMarker();
+            ///////////////////////////////////////
+            ////////////////////////////////////////
+            // 주소로 가져오기   ( 위치 받아서 넣기)
+            ////////////////////////////////////////
+            ///////////////////////////////////////
+
+            ///////////////////////////////////////
+            // 판매자 위치 정보 마커 표시
+//           Geocoder geocoder = new Geocoder(getBaseContext());
+//            List<Address> list = null;
+//            data = new ArrayList<Address>();
+//
+//            ArrayList<String> address = new ArrayList<String>();
+//                address.add("서울특별시 강남구 강남대로 402");
+//                address.add("서울특별시 강남구 강남대로서 510-1");
+//                address.add("경기도 성남시 대왕판교로 477");
+//                address.add("서울특별시 서초구 잠원동 39-12");
+//
+//            try {
+//                for(int i=0; i<address.size(); i++) {
+//                    list = geocoder.getFromLocationName
+//                            (address.get(i), // 지역 이름
+//                                    10); // 읽을 개수
+//                    data.add(list.get(0));
+//                    Log.v("here", String.valueOf(list));
+//                }
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                Log.e("test","입출력 오류 - 서버에서 주소변환시 에러발생");
+//            }
+//
+//
+//            if (list != null) {
+//                if (list.size() == 0) {
+//                    Toast.makeText(MainActivity.this, "해당되는 주소 정보는 없습니다", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    // 해당되는 주소로 인텐트 날리기
+//                    Address addr = list.get(0);
+//                    for(int i=0; i<data.size(); i++) {
+//                        lat = data.get(i).getLatitude();
+//                        lng = data.get(i).getLongitude();
+//
+//                        LatLng setLatLng = new LatLng(lat, lng);
+//
+//                        MarkerOptions markerOptions = new MarkerOptions();
+//                        markerOptions.position(setLatLng);
+//                        markerOptions.title("위치" + (i+1));
+//                        //markerOptions.snippet(list.get(0).get);
+//                        markerOptions.draggable(true);
+//
+//
+//                        setMarker = mMap.addMarker(markerOptions);
+//                    }
+///////////////////////////////////////
+
+
+//                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentPosition);
+//                    mMap.moveCamera(cameraUpdate);
+
+
+
+//    // db 등록된 주소 마커 표시 하기
+//    private void addressMarker(){
+//        Geocoder geocoder = new Geocoder(getBaseContext());
+//        List<Address> userAddresslist = null;
+//
+//        ArrayList<String> address = new ArrayList<String>();
+//        address.add("서울특별시 강남구 강남대로 402");
+//        address.add("서울특별시 강남구 강남대로서 510-1");
+//        address.add("경기도 성남시 대왕판교로 477");
+//        address.add("서울특별시 서초구 잠원동 39-12 ");
+//
+//       try {
+//
+//            for (int j=0; j<address.size(); j++) {
+//                userAddresslist = geocoder.getFromLocationName
+//                        (address.get(j), // 지역 이름
+//                                10); // 읽을 개수
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            Log.e("test","입출력 오류 - 서버에서 주소변환시 에러발생");
+//        }
+//
+//        if (userAddresslist != null) {
+//            if (userAddresslist.size() == 0) {
+//                Toast.makeText(MainActivity.this, "해당되는 주소 정보는 없습니다", Toast.LENGTH_SHORT).show();
+//            } else {
+//                // 해당되는 주소로 인텐트 날리기
+//                double lat = 0;
+//                double lon = 0;
+//
+//                for (int i = 0; i < userAddresslist.size(); i++) {
+//
+//                    Address addr = userAddresslist.get(i);
+//                    lat = addr.getLatitude();
+//                    lon = addr.getLongitude();
+//
+//                    LatLng setLatLng = new LatLng(lat, lon);
+//
+//                    MarkerOptions markerOptions = new MarkerOptions();
+//                    markerOptions.position(setLatLng);
+//                    markerOptions.title("판매자" + i);
+//                    //markerOptions.snippet(list.get(0).get);
+//                    markerOptions.draggable(true);
+//
+//
+//                    setMarker = mMap.addMarker(markerOptions);
+//                }
+//
+//                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentPosition);
+//                mMap.moveCamera(cameraUpdate);
+//            }
+//        }
+//                Address addr = userAddresslist.get(0);
+//                lat = addr.getLatitude();
+//                lon = addr.getLongitude();
+//
+//                LatLng setLatLng = new LatLng(lat, lon);
+//
+//                MarkerOptions markerOptions = new MarkerOptions();
+//                markerOptions.position(setLatLng);
+//                markerOptions.title("위치 보내기");
+//                //markerOptions.snippet(list.get(0).get);
+//                markerOptions.draggable(true);
+//
+//
+//                setMarker = mMap.addMarker(markerOptions);
+//
+//                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(setLatLng);
+//                mMap.moveCamera(cameraUpdate);
+//
+//
+//    }
+
+
+
+    // 판매자 위치 표시 메소드
+    private void sellerLocation(){
+        /////////////////////////////////////////////////
+        // 판매자 위치 표시    (메인화면 - GPS)
+        //////////////////////////////////////////////////
+        Geocoder geocoder1 = new Geocoder(getBaseContext());
+        List<Address> list = null;
+        data = new ArrayList<Address>();
+
+        ArrayList<String> address = new ArrayList<String>();
+        address.add("서울특별시 강남구 강남대로 402");
+        address.add("서울특별시 강남구 강남대로서 510-1");
+        address.add("경기도 성남시 대왕판교로 477");
+        address.add("서울특별시 서초구 잠원동 39-12");
+
+        try {
+            for(int i=0; i<address.size(); i++) {
+                list = geocoder1.getFromLocationName
+                        (address.get(i), // 지역 이름
+                                10); // 읽을 개수
+                data.add(list.get(0));
+                Log.v("here", String.valueOf(list));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("test","입출력 오류 - 서버에서 주소변환시 에러발생");
+        }
+
+
+        if (list != null) {
+            if (list.size() == 0) {
+                Toast.makeText(MainActivity.this, "해당되는 주소 정보는 없습니다", Toast.LENGTH_SHORT).show();
+            } else {
+                // 해당되는 주소로 인텐트 날리기
+                Address addr = list.get(0);
+                for (int i = 0; i < data.size(); i++) {
+                    lat = data.get(i).getLatitude();
+                    lng = data.get(i).getLongitude();
+
+                    LatLng setLatLng = new LatLng(lat, lng);
+
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(setLatLng);
+                    markerOptions.title("위치" + (i + 1));
+                    //markerOptions.snippet(list.get(0).get);
+                    markerOptions.draggable(true);
+
+
+                    setMarker = mMap.addMarker(markerOptions);
+                }
+            }
+        }
+    }
+
+
+    // map 초기 설정
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         Log.d(TAG, "onMapReady :");
 
         mMap = googleMap;
 
+        // 말풍선 클릭 시 이벤트
         mMap.setOnInfoWindowClickListener(this);
         Geocoder geocoder = new Geocoder(this);
 
         //런타임 퍼미션 요청 대화상자나 GPS 활성 요청 대화상자 보이기전에
         //지도의 초기위치를 서울로 이동
         setDefaultLocation();
+
+
+        //////////////////////////////////////////////////
+        // 판매자 위치 표시    (메인화면 - GPS)
+        //////////////////////////////////////////////////
+        Geocoder geocoder1 = new Geocoder(getBaseContext());
+        List<Address> list = null;
+        data = new ArrayList<Address>();
+
+        ArrayList<String> address = new ArrayList<String>();
+        address.add("서울특별시 강남구 강남대로 402");
+        address.add("서울특별시 강남구 강남대로서 510-1");
+        address.add("경기도 성남시 대왕판교로 477");
+        address.add("서울특별시 서초구 잠원동 39-12");
+
+        try {
+            for(int i=0; i<address.size(); i++) {
+                list = geocoder1.getFromLocationName
+                        (address.get(i), // 지역 이름
+                                10); // 읽을 개수
+                data.add(list.get(0));
+                Log.v("here", String.valueOf(list));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("test","입출력 오류 - 서버에서 주소변환시 에러발생");
+        }
+
+
+        if (list != null) {
+            if (list.size() == 0) {
+                Toast.makeText(MainActivity.this, "해당되는 주소 정보는 없습니다", Toast.LENGTH_SHORT).show();
+            } else {
+                // 해당되는 주소로 인텐트 날리기
+                Address addr = list.get(0);
+                for (int i = 0; i < data.size(); i++) {
+                    lat = data.get(i).getLatitude();
+                    lng = data.get(i).getLongitude();
+
+                    LatLng setLatLng = new LatLng(lat, lng);
+
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(setLatLng);
+                    markerOptions.title("위치" + (i + 1));
+                    //markerOptions.snippet(list.get(0).get);
+                    markerOptions.draggable(true);
+
+
+                    setMarker = mMap.addMarker(markerOptions);
+                }
+            }
+        }
+
+
+
 //        showPlaceInformation(currentPosition);
 //        //카메라 이동 시작
 //        googleMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
@@ -365,8 +584,9 @@ public class MainActivity extends AppCompatActivity
         // 손으로 줌 설정
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // 현재 오동작을 해서 주석처리
 
+
+        // map 클릭 시 신규 마커 생성
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
@@ -495,7 +715,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-
+    // 현 위치 gps를  주소 전환
     public String getCurrentAddress(LatLng latlng) {
 
         //지오코더... GPS를 주소로 변환
@@ -540,6 +760,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    // 현 위치 설정
     public void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {
 
 
@@ -563,7 +784,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
+    // 디폴트 위치 설정
     public void setDefaultLocation() {
 
 
@@ -588,8 +809,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
+    //////////////////////////////////////////////////
     //여기부터는 런타임 퍼미션 처리을 위한 메소드들
+    //////////////////////////////////////////////////
     private boolean checkPermission() {
 
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
@@ -729,29 +951,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    public void showPlaceInformation(LatLng location) {
-
-        //맵이 시작됨과 동시에 마커위치를 표시해줄것이므로 메소드에서 초기화 하면 안돼!
-//            mMap.clear();//지도 클리어
-        if (previous_marker != null) {
-            previous_marker.clear();//지역정보 마커 클리어
-        }
-
-
-
-
-        new NRPlaces.Builder()
-                .listener(MainActivity.this)
-                .key("AIzaSyAEAJPO9fRiNPqBPFbvaiKasj7XCYJPl1U")//api키 입력
-                .latlng(location.latitude, location.longitude)//현재 마커 위치
-                .type(PlaceType.BAKERY)
-                .radius(500) //500 미터 내에서 검색
-                .build()
-                .execute();
-
-    }
-
     @Override
     public void onPlacesFailure(PlacesException e) {
 
@@ -764,37 +963,38 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPlacesSuccess(List<Place> places) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (noman.googleplaces.Place place : places) {
 
-
-                            LatLng latLng
-                            = new LatLng(place.getLatitude()
-                            , place.getLongitude());
-
-                    String markerSnippet = getCurrentAddress(latLng);
-
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(latLng);
-                    markerOptions.title(place.getName());
-                    markerOptions.snippet(markerSnippet);
-                    //주변 위치 표시 마커 아이콘 변경
-                   //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                    Marker item = mMap.addMarker(markerOptions);
-                    previous_marker.add(item);
-
-                }
-
-                //중복 마커 제거
-                HashSet<Marker> hashSet = new HashSet<Marker>();
-                hashSet.addAll(previous_marker);
-                previous_marker.clear();
-                previous_marker.addAll(hashSet);
-
-            }
-        });
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                for (noman.googleplaces.Place place : places) {
+//
+//
+//                            LatLng latLng
+//                            = new LatLng(place.getLatitude()
+//                            , place.getLongitude());
+//
+//                    String markerSnippet = getCurrentAddress(latLng);
+//
+//                    MarkerOptions markerOptions = new MarkerOptions();
+//                    markerOptions.position(latLng);
+//                    markerOptions.title(place.getName());
+//                    markerOptions.snippet(markerSnippet);
+//                    //주변 위치 표시 마커 아이콘 변경
+//                   //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+//                    Marker item = mMap.addMarker(markerOptions);
+//                    previous_marker.add(item);
+//
+//                }
+//
+//                //중복 마커 제거
+//                HashSet<Marker> hashSet = new HashSet<Marker>();
+//                hashSet.addAll(previous_marker);
+//                previous_marker.clear();
+//                previous_marker.addAll(hashSet);
+//
+//            }
+//        });
     }
 
     @Override
@@ -802,6 +1002,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    // 마커 위 말풍선 클릭 시 이벤
     @Override
     public void onInfoWindowClick(Marker marker) {
 
